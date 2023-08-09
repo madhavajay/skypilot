@@ -136,6 +136,14 @@ def read_catalog(filename: str,
 
     try:
         df = pd.read_csv(catalog_path)
+        
+        # patch in new types
+        row = df.query('InstanceType=="Standard_NC24ads_A100_v4" & Region=="eastus2"')
+        entry = dict(row.iloc[0])
+        entry["InstanceType"] = "Standard_NCC24ads_A100_v4"
+        df = pd.concat([df, pd.DataFrame([entry])], ignore_index=True)
+        assert len(df.query('InstanceType=="Standard_NCC24ads_A100_v4"')) == 1
+
     except Exception as e:  # pylint: disable=broad-except
         # As users can manually modify the catalog, read_csv can fail.
         logger.error(f'Failed to read {catalog_path}. '
